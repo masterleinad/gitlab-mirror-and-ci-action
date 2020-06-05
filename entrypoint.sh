@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -u
+set -e
 
 DEFAULT_POLL_TIMEOUT=10
 POLL_TIMEOUT=${POLL_TIMEOUT:-$DEFAULT_POLL_TIMEOUT}
@@ -48,7 +49,15 @@ echo "Pipeline finished with status ${ci_status}"
   
 if [ "$ci_status" = "success" ]
 then 
-  curl -d '{"state":"success", "target_url": "'${ci_web_url}'", "context": "gitlab-ci"}' -H "Authorization: token ${GITHUB_TOKEN}"  -H "Accept: application/vnd.github.antiope-preview+json" -X POST --silent "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" 
+  curl -d '{"state":"success", "target_url": "'${ci_web_url}'", "context": "gitlab-ci"}' -H "Authorization: token ${GITHUB_TOKEN}"  -H "Accept: application/vnd.github.antiope-preview+json" -X POST --silent "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
+  if [ -n "${ARTIFACT_JOB_NAME}" ] && [ -n "${ARTIFACT_NAME}" ]
+  then
+    job_id=$(curl --header "PRIVATE-TOKEN: ${GITLAB_PASSWORD}" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/pipelines/${pipeline_id}/jobs" | jq --arg JOB_NAME "${ARTIFACT_JOB_NAME}" '.[] | select(.name==$JOB_NAME).id')
+    echo "job_id is ${job_id}"
+    results=$(curl --location --header "PRIVATE-TOKEN: ${GITLAB_PASSWORD}" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/jobs/${job_id}/artifacts/${ARTIFACT_NAME}${pipeline_id}")
+    echo "${results}"
+  fi
+
   exit 0
 elif [ "$ci_status" = "failed" ]
 then 
