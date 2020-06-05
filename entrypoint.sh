@@ -54,7 +54,7 @@ then
   then
     job_id=$(curl --header "PRIVATE-TOKEN: ${GITLAB_PASSWORD}" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/pipelines/${pipeline_id}/jobs" | jq .[${ARTIFACT_JOB_ID}].id)
     echo "job_id is ${job_id}"
-    results=$(curl --location --header "PRIVATE-TOKEN: ${GITLAB_PASSWORD}" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/jobs/${job_id}/artifacts/${ARTIFACT_NAME}")
+    results=$(curl --location --header "PRIVATE-TOKEN: ${GITLAB_PASSWORD}" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/jobs/${job_id}/artifacts/${ARTIFACT_NAME}${pipeline_id}")
     echo "${results}"
   fi
 
