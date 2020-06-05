@@ -49,8 +49,8 @@ echo "Pipeline finished with status ${ci_status}"
   
 if [ "$ci_status" = "success" ]
 then 
-  curl -d '{"state":"success", "target_url": "'${ci_web_url}'", "context": "gitlab-ci"}' -H "Authorization: token ${GITHUB_TOKEN}"  -H "Accept: application/vnd.github.antiope-preview+json" -X POST --silent "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" 
-  if [ ! -z "${ARTIFACT_JOB_ID}" && ! -z "${ARTIFACT_NAME}" ]
+  curl -d '{"state":"success", "target_url": "'${ci_web_url}'", "context": "gitlab-ci"}' -H "Authorization: token ${GITHUB_TOKEN}"  -H "Accept: application/vnd.github.antiope-preview+json" -X POST --silent "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}"
+  if [ -n "${ARTIFACT_JOB_ID}" ] && [ -n "${ARTIFACT_NAME}" ]
   then
     job_id=$(curl --header "PRIVATE-TOKEN: ${GITLAB_PASSWORD}" --silent "https://${GITLAB_HOSTNAME}/api/v4/projects/${GITLAB_PROJECT_ID}/pipelines/${pipeline_id}/jobs" | jq .${ARTIFACT_JOB_ID}.id)
     echo "job_id is ${job_id}"
